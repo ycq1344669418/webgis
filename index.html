@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>GeoJSONLayer - 4.11</title>
+
+		<style>
+			html,
+			body,
+			#viewDiv {
+				padding: 0;
+				margin: 0;
+				height: 100%;
+				width: 100%;
+			}
+		</style>
+
+		<link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/themes/light/main.css" />
+		<script src="https://js.arcgis.com/4.11/"></script>
+
+		<script>
+			require([
+				"esri/Map",
+				"esri/layers/GeoJSONLayer",
+				"esri/views/MapView"
+			], function(Map, GeoJSONLayer, MapView) {
+				// If GeoJSON files are not on the same domain as your website, a CORS enabled server
+				// or a proxy is required.
+				const defaultSym = {
+					type: "simple-fill", // autocasts as new SimpleFillSymbol()
+					outline: {
+						// autocasts as new SimpleLineSymbol()
+						color: [128, 128, 128, 0.2],
+						width: "0.5px"
+					}
+				};
+				const renderer = {
+					type: "simple", // autocasts as new SimpleRenderer()
+					symbol: defaultSym,
+
+					visualVariables: [{
+						type: "color",
+						field: "pop2000",
+
+						stops: [{
+								value: 440000,
+								color: "#FFFCD4",
+
+							},
+							{
+								value: 91236854,
+								color: "#350242",
+
+							}
+						]
+					}]
+				};
+				const url =
+					"https://raw.githubusercontent.com/ycq1344669418/webgis/master/chinawgs84%20(1).json";
+
+				// Paste the url into a browser's address bar to download and view the attributes
+				// in the GeoJSON file.
+
+				const geojsonLayer = new GeoJSONLayer({
+					url: url,
+					renderer: renderer,
+				});
+
+				const map = new Map({
+					basemap: "gray",
+					layers: [geojsonLayer]
+				});
+
+				const view = new MapView({
+					container: "viewDiv",
+					center: [114.3, 35],
+					zoom: 4,
+					map: map
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<div id="viewDiv"></div>
+	</body>
+
+</html>
