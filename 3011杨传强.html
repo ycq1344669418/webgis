@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+		<style>
+			html,
+			body {
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			
+			#div {
+				width: 50%;
+				height: 100%;
+				background-color: aqua;
+			}
+			
+			#map1 {
+				width: 50%;
+				height: 100%;
+				position: absolute;
+				float: left;
+				z-index: 50;
+			}
+			
+			#map2 {
+				width: 50%;
+				height: 100%;
+				position: relative;
+				float: right;
+			}
+			
+			#map3 {
+				position: absolute;
+				width: 50%;
+				height: 100%;
+				float: left;
+				z-index: 30;
+				top: 0px;
+			}
+			
+			#scale {
+				width: 150px;
+				bottom: 60px;
+				left: 20px;
+				position: absolute;
+				z-index: 99;
+				background-color: white;
+				border-radius: 8px;
+				padding: 10px;
+				opacity: 0.75;
+			}
+			
+			#coordinate {
+				width: 180px;
+				bottom: 20px;
+				left: 20px;
+				position: absolute;
+				z-index: 80;
+				background-color: white;
+				border-radius: 8px;
+				padding: 10px;
+				opacity: 0.75;
+			}
+			
+
+			
+			#layerToggle {
+				top: 60px;
+				right: 20px;
+				position: absolute;
+				z-index: 50;
+				background-color: white;
+				border-radius: 8px;
+				padding: 10px;
+				opacity: 0.75;
+			}
+			
+			
+			
+			.btn-switch {
+				flex-grow: 4;
+				background-color: rgba(34, 111, 14, 0.5);
+				color: #FFF;
+				margin: 1px;
+				width: 50%;
+				padding: 20px;
+				overflow: auto;
+				text-align: center;
+				cursor: pointer;
+				font-size: 0.7em;
+			}
+			
+			.active-map {
+				color: #fff;
+				background-color: rgba(34, 111, 14, 1);
+			}
+		</style>
+
+		<link rel="stylesheet" href="https://js.arcgis.com/4.10/esri/css/main.css">
+		<script src="https://js.arcgis.com/4.10/"></script>
+		<script>
+			//創建全局变量mtype
+			var mtype = 0;
+			//卷帘函数
+			function clipImage() {
+				if(mtype == 1) {
+					console.log(event.clientX);
+					document.getElementById("map1").style.clip = "rect(0px," + event.clientX + "px,800px,0px)";
+				}
+
+			}
+			//通过全局变量mtype控制卷帘函数的开与关
+			function mapSwitch(v) {
+				if(v == 0) {
+
+					mtype = 1;
+				} else {
+					mtype = 0;
+				}
+			}
+			require([
+				"esri/Map",
+				"esri/views/MapView",
+				"esri/core/watchUtils",
+
+				"esri/views/SceneView",
+
+				"esri/layers/FeatureLayer",
+				"esri/widgets/Legend",
+				"dojo/domReady!"
+			], function(Map, MapView, watchUtils, SceneView, FeatureLayer,Legend) {
+				
+				//创建地图1
+				var map1 = new Map({
+					basemap: "hybrid",
+
+				});
+				var map2 = new Map({
+					basemap: "streets",
+				
+				});
+				//创建地图2
+				var map3 = new Map({
+					basemap: "streets",
+
+				});
+				/////////////////////////////////////
+				 const defaultSym = {
+				  type: "simple-fill", // autocasts as new SimpleFillSymbol()
+				  outline: {
+				    // autocasts as new SimpleLineSymbol()
+				    color: [128, 128, 128, 0.2],
+				    width: "0.5px"
+				  }
+				};
+				
+						const xuexiao = new FeatureLayer({
+							 url:
+							  "https://services9.arcgis.com/FrtjunxLRskcfbT2/ArcGIS/rest/services/xuexiao/FeatureServer/0",
+							title: "学校",
+							renderer: {
+								type: "simple", // autocasts as new SimpleRenderer()
+								symbol: {
+									type: "web-style", // autocasts as new WebStyleSymbol()
+									name: "City Hall",
+									styleName: "EsriIconsStyle"
+								}
+							}
+						});
+						const ditie = new FeatureLayer({
+							 url:
+							  "https://services9.arcgis.com/FrtjunxLRskcfbT2/ArcGIS/rest/services/ditie/FeatureServer/0",
+							title: "地铁",
+							renderer: {
+								type: "simple", // autocasts as new SimpleRenderer()
+								symbol: {
+									type: "web-style", // autocasts as new WebStyleSymbol()
+									name: "Bus",
+									styleName: "EsriIconsStyle"
+								}
+							}
+						});
+						const lvdi = new FeatureLayer({
+							 url:
+							  "https://services9.arcgis.com/FrtjunxLRskcfbT2/ArcGIS/rest/services/lvdi/FeatureServer/0",
+							title: "绿地公园",
+							renderer: {
+								type: "simple", // autocasts as new SimpleRenderer()
+								symbol: {
+									type: "web-style", // autocasts as new WebStyleSymbol()
+									name: "Park",
+									styleName: "EsriIconsStyle"
+								}
+							}
+						});
+						const shuiyu = new FeatureLayer({
+							 url:
+							  "https://services9.arcgis.com/FrtjunxLRskcfbT2/ArcGIS/rest/services/shuiyu/FeatureServer/0",
+							title: "水域",
+							renderer: {
+								type: "simple", // autocasts as new SimpleRenderer()
+								symbol: {
+									type: "web-style", // autocasts as new WebStyleSymbol()
+									name: "Beach",
+									styleName: "EsriIconsStyle"
+								}
+							}
+						});
+						const yiyuan = new FeatureLayer({
+							 url:
+							  "https://services9.arcgis.com/FrtjunxLRskcfbT2/ArcGIS/rest/services/yiyuan/FeatureServer/0",
+							title: "医院",
+							renderer: {
+								type: "simple", // autocasts as new SimpleRenderer()
+								symbol: {
+									type: "web-style", // autocasts as new WebStyleSymbol()
+									name: "Hospital",
+									styleName: "EsriIconsStyle"
+								}
+							}
+						});
+		
+					 var template = {
+				  title: "学区简介：",
+				  content: "{name}的对口小学为 {xiaoxue} ，小学重点程度为 {defen} 。其对口中学为 {zhongxue}，其重点程度为{defenyi}."
+				};
+				
+						const fangjia = new FeatureLayer({
+							 url:
+							  "https://services9.arcgis.com/FrtjunxLRskcfbT2/ArcGIS/rest/services/fangjia_csv1/FeatureServer/0",
+							title: "房价",
+							popupTemplate: template,
+							renderer : {
+							  type: "simple", // autocasts as new SimpleRenderer()
+							  symbol: {
+							    type: "point-3d", // autocasts as new PointSymbol3D()
+							    symbolLayers: [
+							      {
+							        type: "object", // autocasts as new ObjectSymbol3DLayer()
+							        resource: {
+							          primitive: "cone"
+							        },
+							        width: 500 // width of the symbol in meters
+							      }
+							    ]
+							  },
+							
+							  visualVariables: [
+							    {
+							      type: "color",
+							      field: "valve1",
+							      stops: [
+							        {
+							          value: 18000,
+							          color: "#D1E9E9"
+							        },
+							        {
+							          value: 50000,
+							          color: "#336666"
+							        }
+							      ]
+							    },
+							    {
+							      type: "size",
+							      field: "valve1",
+							      stops: [
+							        {
+							          value: 18000,
+							          size: 500
+							        },
+							        {
+							          value: 50000,
+							          size: 5000
+							        }
+							      ],
+							      axis: "height"
+							    },
+							    {
+							      type: "size",
+							      axis: "width-and-depth",
+							      useSymbolValue: true // uses the width value defined in the symbol layer (50,000)
+							    }
+							  ]
+							}
+						});
+						map2.add(shuiyu);
+						map2.add(yiyuan);
+						map2.add(lvdi);
+						map2.add(fangjia);
+						map2.add(ditie);
+						
+				////////////////////////////////////////
+				//创建专题图层
+				 const renderer = {
+				  type: "simple", // autocasts as new SimpleRenderer()
+				  symbol: defaultSym,
+				  label: "U.S. County",
+				  visualVariables: [
+				    {
+				      type: "color",
+				      field: "all_",
+				     
+				      stops: [
+				        {
+				          value: 1,
+				          color: "#97CBFF",
+				 
+				        },
+				        {
+				          value: 4,
+				          color: "#005AB5",
+				       
+				        }
+				      ]
+				    }
+				  ]
+				};
+				
+				const povLayer = new FeatureLayer({
+				  url:
+				    "https://services9.arcgis.com/FrtjunxLRskcfbT2/ArcGIS/rest/services/uuuu/FeatureServer/0",
+				  renderer: renderer,
+				  title: "各因素累加影响"
+				});
+				map3.add(povLayer);
+				//将专题图层加载至初始底图中
+				
+				var senceview = new SceneView({
+					container: "map2",
+					map: map2
+				});
+				//创建视图1
+				var view1 = new MapView({
+					container: "map1",
+					map: map1,
+					zoom: 13,
+					center: { // autocasts as esri/geometry/Point
+						x: 114.32,
+						y: 30.56,
+					},
+
+				});
+				//创建视图2
+				var view2 = new SceneView({
+					container: "map2",
+					map: map2,
+					camera: {
+					            position: {
+					              latitude: 30.46246,
+					              longitude: 114.37799816,
+					              z: 20000
+					            },
+					            tilt:30,
+					            heading: 0
+					          },
+					
+				});
+				//创建视图3
+				var view3 = new MapView({
+					container: "map3",
+					map: map3,
+					zoom: 13,
+					center: { // autocasts as esri/geometry/Point
+						x: 114.32,
+						y: 30.56,
+					},
+				});
+				//将视图1与视图2联动
+				watchUtils.whenTrue(view1, "stationary", function() {
+					if(view1.extent) {
+
+						view2.extent = view1.extent;
+
+					}
+				});
+				//将视图2与视图1联动
+				watchUtils.whenTrue(view2, "stationary", function() {
+
+					if(view2.extent) {
+						view1.extent = view2.extent;
+					}
+
+				});
+				//将视图1与视图3联动
+				watchUtils.whenTrue(view1, "stationary", function() {
+
+					if(view1.extent) {
+						view3.extent = view1.extent;
+					}
+
+				});
+				//将视图3与视图1联动
+				watchUtils.whenTrue(view3, "stationary", function() {
+
+					if(view3.extent) {
+						view1.extent = view3.extent;
+					}
+
+				});
+				/////////////////////////////////////3/////////////
+				const renderer2 = {
+				    type: "heatmap",
+				    colorStops: [
+				      { color: "rgba(63, 40, 102, 0)", ratio: 0 },
+				     { color: "#472b77", ratio: 0.083 },
+				     { color: "#4e2d87", ratio: 0.166 },
+				     { color: "#563098", ratio: 0.249 },
+				     { color: "#5d32a8", ratio: 0.332 },
+				     { color: "#6735be", ratio: 0.415 },
+				     { color: "#7139d4", ratio: 0.498 },
+				     { color: "#7b3ce9", ratio: 0.581 },
+				     { color: "#853fff", ratio: 0.664 },
+				     { color: "#a46fbf", ratio: 0.747 },
+				     { color: "#c29f80", ratio: 0.83 },
+				     { color: "#e0cf40", ratio: 0.913 },
+				     { color: "#ffff00", ratio: 1 }
+				    ],
+				    maxPixelIntensity: 0.5,
+				    minPixelIntensity: 0
+				  };
+				
+				// Create the layer and set the renderer
+				var trailheads = new FeatureLayer({
+				  url: "https://services9.arcgis.com/FrtjunxLRskcfbT2/ArcGIS/rest/services/fangjia_csv1/FeatureServer/0",
+				  renderer: renderer2
+				});
+				    
+				// Add the layer
+				map1.add(trailheads);
+				////////////////////////////////////////////////////
+				//创建坐标变量
+				var zuobiao = document.getElementById("coordinate");
+				//创建比例尺变量
+				var scale = document.getElementById("scale");
+				//当坐标点移动时回传坐标
+				view1.on('pointer-move', function(evt) {
+					var point = view1.toMap({
+						x: evt.x,
+						y: evt.y
+					});
+					zuobiao.textContent = "坐标：" +point.longitude.toFixed(3) + "," + point.latitude.toFixed(3);
+					scale.textContent = "比例尺：" + view1.scale.toFixed(3);
+				});
+				view2.ui.add(new Legend({
+					view: view2
+				}), "bottom-right");
+				var xuexiac = document.getElementById("xuexiao1");
+				xuexiac.addEventListener("change", function() {
+					xuexiao.visible = xuexiac.checked;	
+				});
+				
+				//切换底图按钮，当按钮改变时，回传按钮id，并根据id将图层数组的相应地图添加到视图中
+				
+
+			});
+		</script>
+	</head>
+
+	<body>
+
+		
+		<!--创建窗口，并在单击鼠标时控制卷帘函数开关，鼠标移动时执行卷帘函数-->
+		<div onmousemove="clipImage()" ondblclick="mapSwitch(mtype)">
+			<!--创建地图窗口1-->
+			<div id="map1">
+				<!--添加坐标和比例尺-->
+				<div id="coordinate"></div>
+				<div id="scale"></div>
+			</div>
+			<!--创建地图窗口3-->
+			<div id="map3"></div>
+		</div>
+		<!--创建地图窗口2-->
+		<div id="map2">
+
+		</div>
+		<!--添加图层的添加与删除-->
+		<span id="layerToggle">
+		 <input type="checkbox" id="yiyuan1" checked="checked" /> 医院<br />
+		 <input type="checkbox" id="lvdi1" checked="checked" />公园绿地<br />
+		 <input type="checkbox" id="shuiyu1" checked="checked" /> 水域<br />
+		 <input type="checkbox" id="xuexiao1" checked="checked" />学校<br />
+		 <input type="checkbox" id="ditie1" checked="checked" /> 地铁站<br />
+		 <input type="checkbox" id="fangjia1" checked="checked" />住宅小区<br />
+		</span>
+
+	</body>
+
+</html>
